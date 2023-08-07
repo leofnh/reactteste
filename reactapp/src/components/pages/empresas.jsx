@@ -11,7 +11,8 @@ export default function Empresas() {
     const [nomeFantasiaInput, setNomeFantasia] = useState('');
     const [cnaeInput, setCnae] = useState('');
     const [selectedCompanyId, setSelectedCompanyId] = useState(null);
-
+    const [pageAtual, setPage] = useState(1);
+    const [ultimaPagina, setUltimaPagina] = useState(1);
     useEffect(() => {
         buscarDados();
     }, [])
@@ -75,11 +76,90 @@ export default function Empresas() {
           });
 
     };
+
+    const subPagina = () => {
+        let soma;
+        if (pageAtual <= 1){
+            soma = pageAtual;
+        } else {
+            soma = pageAtual - 1;
+        }
+
+        const data = new FormData();
+        data.append('usuario', 'autorizado');
+        fetch(`https://leofnhflask.pythonanywhere.com/acoes-empresas-teste/1/1?page=${soma}`, {
+            method: "GET",
+
+        })
+            .then(result => result.json())
+            .then(data => {
+                const status = data['status'];
+                const situacao = data['situacao'];
+                if (situacao == 'sucesso') {
+
+                    const dados = data['empresas'];
+                    const paginaAtual = data['pagina_atual'];
+                    const ultimaPagina = data['total_paginas'];
+                    setPage(paginaAtual)
+                    setDados(dados);
+                    setAviso(status);
+                    setUltimaPagina(ultimaPagina);
+
+                } else {
+                    setAviso(status);
+                    setDados('');
+                }
+            })
+            .catch(error => {
+                setAviso(error);
+            });
+
+
+    }
+    const setarPagina = () => {
+        let soma;
+        if (pageAtual >= ultimaPagina){
+            soma = pageAtual;
+        } else {
+            soma = pageAtual + 1;
+        }
+
+        const data = new FormData();
+        data.append('usuario', 'autorizado');
+        fetch(`https://leofnhflask.pythonanywhere.com/acoes-empresas-teste/1/1?page=${soma}`, {
+            method: "GET",
+
+        })
+            .then(result => result.json())
+            .then(data => {
+                const status = data['status'];
+                const situacao = data['situacao'];
+                if (situacao == 'sucesso') {
+
+                    const dados = data['empresas'];
+                    const paginaAtual = data['pagina_atual'];
+                    const ultimaPagina = data['total_paginas'];
+                    setPage(paginaAtual)
+                    setDados(dados);
+                    setAviso(status);
+                    setUltimaPagina(ultimaPagina);
+
+                } else {
+                    setAviso(status);
+                    setDados('');
+                }
+            })
+            .catch(error => {
+                setAviso(error);
+            });
+
+
+    }
     const buscarDados = () => {
 
         const data = new FormData();     
         data.append('usuario', 'autorizado');
-        fetch("https://leofnhflask.pythonanywhere.com/acoes-empresas-teste/1/1", {
+        fetch(`https://leofnhflask.pythonanywhere.com/acoes-empresas-teste/1/1?page=${pageAtual}`, {
         method: "GET",    
               
       })
@@ -87,10 +167,13 @@ export default function Empresas() {
       .then(data => {
         const status = data['status'];  
         const situacao = data['situacao'];
-        if (situacao == 'sucesso') {     
-            
-            console.log('Sucesso na situação!');
-            const dados = data['empresas'];            
+        if (situacao == 'sucesso') {
+
+            const dados = data['empresas'];
+            const paginaAtual = data['pagina_atual'];
+            const totalPaginas = data['total_paginas'];
+            setUltimaPagina(totalPaginas);
+            setPage(paginaAtual)
             setDados(dados);
             setAviso(status);
             
@@ -144,8 +227,18 @@ export default function Empresas() {
                                 <button className='btn-excluir' onClick={() => excluirEmpresa(x.id, x.usuario, x.cnpj)} >Excluir</button>
                             </td>
                         </tr>
+
                     ))}
+
+                    <tr>
+                        <td colSpan="5" style={{ textAlign: 'right' }}>
+                            <button onClick={() => subPagina()}> Anterior </button>
+                            <button onClick={() => setarPagina()}> Próxima </button>
+                        </td>
+                    </tr>
+
                 </tbody>
+
             </table>  
 
             <Modal companyId={selectedCompanyId} isOpen={openModal} setModalOpen={() => setOpenModal(!openModal)} editarEmpresa={editarEmpresa}>
