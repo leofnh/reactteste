@@ -28,7 +28,6 @@ export default function Empresas() {
                     'cnae': cnaeInput,
                     'nome_fantasia': nomeFantasiaInput
                 }
-
                 fetch(`https://leofnhflask.pythonanywhere.com/acoes-empresas-teste/${usuarioId}/${companyId}`, {
                 method: 'PUT',
                 headers: {
@@ -44,7 +43,7 @@ export default function Empresas() {
                 
                 })
                 .catch(error => {
-                    console.error(error);
+                    setAviso(error);
                 });
 
             }
@@ -93,7 +92,7 @@ export default function Empresas() {
             console.log('Sucesso na situação!');
             const dados = data['empresas'];            
             setDados(dados);
-            setAviso(status);            
+            setAviso(status);
             
         } else {            
             setAviso(status);
